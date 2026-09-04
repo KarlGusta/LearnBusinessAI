@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <!--
+  THESIS: The 102-session curriculum is a rail journey along the AI conduit
+  every business is about to own; the dashboard is its station wall map.
+  Refuses the metric-card dashboard grid.
+  OWN-WORLD: Deep ink-violet #130f2b ground, electric violet wash lifting the
+  key artifacts (service board, panels, station tables), porcelain #eceafc,
+  nine enamel line inks (scarlet cobalt amber green magenta sky violet orange
+  teal), thin porcelain strokes, pill controls, Space Grotesk caps + Inter
+  body. Recognizable empty: a snaking colored line with hollow ticks on ink.
+  STORY: Rider checks the board, sees NOW BOARDING, rides one station a
+  night, watches the porcelain fill toward the conduit terminus.
+  FIRST VIEWPORT: Brand roundel, service board strip, NOW BOARDING card with
+  scarlet action, then the Network Map drawing itself in.
+  FORM: Conduit Transit Diagram, third line forked from the Marketing Mastery
+  Line with the same engine; ink-violet and electric violet so the three
+  dashboards are distinct at a glance.
+  -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Business AI Conduit Line</title>
+  <meta name="description" content="Personal business-AI curriculum as a transit map: build, ground, guard and sell the AI conduit every business will own. Self adjusting daily schedule, 102 one hour sessions, free first with paid flagged.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23130f2b'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%23eceafc' stroke-width='3'/%3E%3Ccircle cx='16' cy='16' r='3.5' fill='%23a78bfa'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="mural">
+
+    <header class="topbar">
+      <div class="brand">
+        <span class="roundel" aria-hidden="true"><span class="roundel-core"></span></span>
+        <div class="brand-text">
+          <span class="brand-name">Business AI Conduit Line</span>
+          <span class="brand-sub">Website &#8594; Phone &#8594; Email &#8594; Social &#8594; AI &middot; one station per night</span>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button id="theme-toggle" class="chip-btn" title="Toggle theme" aria-label="Toggle theme">Day map</button>
+        <button id="settings-toggle" class="chip-btn" title="Settings" aria-label="Settings">Service</button>
+      </div>
+    </header>
+
+    <!-- Service board -->
+    <section class="board" aria-label="Progress metrics">
+      <div class="board-cell">
+        <span class="b-label">Journey</span>
+        <span class="b-value" id="stat-pct">0%</span>
+        <div class="b-bar" aria-hidden="true"><div class="b-bar-fill" id="progress-bar"></div></div>
+      </div>
+      <div class="board-cell">
+        <span class="b-label">Stations</span>
+        <span class="b-value" id="stat-done">0/0</span>
+        <span class="b-meta">1 hour each</span>
+      </div>
+      <div class="board-cell">
+        <span class="b-label">Streak</span>
+        <span class="b-value b-green" id="stat-streak">0</span>
+        <span class="b-meta">service days in a row</span>
+      </div>
+      <div class="board-cell">
+        <span class="b-label">Hours left</span>
+        <span class="b-value" id="stat-hours">0h</span>
+        <span class="b-meta">to the terminus</span>
+      </div>
+      <div class="board-cell">
+        <span class="b-label">Short term</span>
+        <span class="b-value" id="stat-short">0%</span>
+        <span class="b-meta">conduit live on a real site</span>
+      </div>
+      <div class="board-cell">
+        <span class="b-label">Est arrival</span>
+        <span class="b-value b-value-sm" id="stat-finish">-</span>
+        <span class="b-meta">shifts as you ride</span>
+      </div>
+    </section>
+
+    <!-- Now boarding -->
+    <section class="panel today-panel">
+      <div class="panel-head">
+        <h2 class="panel-title">Now boarding</h2>
+        <span class="panel-meta"><span id="today-date"></span> &middot; <span id="today-slot"></span></span>
+      </div>
+      <div class="panel-body" id="today-body"></div>
+    </section>
+
+    <!-- Views -->
+    <nav class="viewnav" aria-label="Views">
+      <button class="tab active" data-panel="panel-timeline">Network map</button>
+      <button class="tab" data-panel="panel-schedule">Departures</button>
+      <button class="tab" data-panel="panel-tasks">All stations</button>
+    </nav>
+
+    <section id="panel-timeline" class="tab-panel active">
+      <div class="panel map-panel">
+        <div class="map-wrap" id="map-wrap"></div>
+      </div>
+      <div id="timeline-body"></div>
+    </section>
+
+    <section id="panel-schedule" class="tab-panel">
+      <div class="panel" id="schedule-body"></div>
+    </section>
+
+    <section id="panel-tasks" class="tab-panel">
+      <div id="tasks-body"></div>
+    </section>
+
+    <footer class="footnote">
+      <p>102 stations &middot; 1 hour each &middot; free first, paid flagged &middot; skipped days shift every remaining station forward automatically.<br>
+      Progress is stored in this browser only. Export a backup from Service before clearing browser data.</p>
+    </footer>
+  </div>
+
+  <!-- Settings -->
+  <aside id="settings-panel" class="settings-panel" aria-label="Settings">
+    <div class="settings-head">
+      <h2>Service settings</h2>
+      <button id="settings-close" class="chip-btn" aria-label="Close settings">Close</button>
+    </div>
+
+    <div class="settings-section">
+      <h3>Service days</h3>
+      <div id="weekday-picker" class="weekday-picker"></div>
+      <p class="hint">Pick 4 to 5 days. Sessions run only on service days. Changing this reflows every future date instantly.</p>
+    </div>
+
+    <div class="settings-section">
+      <h3>Departure time</h3>
+      <input type="time" id="time-input" class="time-input" value="21:00">
+      <p class="hint">Each session is 60 minutes from this time.</p>
+    </div>
+
+    <div class="settings-section">
+      <h3>Backup</h3>
+      <div class="settings-btn-row">
+        <button id="export-btn" class="btn btn-ghost btn-sm">Export JSON</button>
+        <label class="file-label btn btn-ghost btn-sm">Import JSON
+          <input type="file" id="import-input" accept="application/json">
+        </label>
+      </div>
+      <p class="hint">Progress lives in this browser only. Export before switching browsers or machines.</p>
+    </div>
+
+    <div class="settings-danger">
+      <button id="reset-btn" class="btn btn-danger btn-sm">Reset all progress</button>
+      <p class="hint">Deletes every completion and note on this device.</p>
+    </div>
+  </aside>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
