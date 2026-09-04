@@ -12,7 +12,7 @@
 const PHASES = [
   {
     id: "p1",
-    name: "Foundations: How the Machine Thinks",
+    name: "Foundations",
     term: "short",
     goal: "How LLMs actually work at operator depth: tokens, attention, sampling, the open model landscape. The calculator rule: learn the thinking, not just the tool."
   },
@@ -24,43 +24,43 @@ const PHASES = [
   },
   {
     id: "p3",
-    name: "Context Is the Product",
+    name: "Context and RAG",
     term: "short",
     goal: "RAG and knowledge engineering on Supabase pgvector. Personalized means it has context: the conduit only sells and supports as well as it knows the business."
   },
   {
     id: "p4",
-    name: "Conduit v1: Build and Harden",
+    name: "Conduit v1",
     term: "short",
     goal: "The live business AI: evaluated, guarded, red-teamed, logged, with human handoff. Its two named jobs: help sell things, help do support."
   },
   {
     id: "p5",
-    name: "Channels: One Brain, Many Doors",
+    name: "Channels",
     term: "short",
     goal: "Web widget, WhatsApp, Instagram DM, email, and the business's own MCP endpoint. The device is unknown, so the core stays channel-agnostic."
   },
   {
     id: "p6",
-    name: "Teach the Model: Own the Brain",
+    name: "Teach the Model",
     term: "long",
     goal: "Fine-tuning on free GPUs, quantized local inference on a RAM-rich CPU box, model soups, distillation. Open weights mean the business owns its AI instead of renting it."
   },
   {
     id: "p7",
-    name: "Discovery When AIs Choose",
+    name: "GEO Discovery",
     term: "long",
     goal: "GEO: being the business that consumer AIs recommend and can talk to. Schema, llms.txt, quotable content, measurement. Where the SEO track and the conduit converge."
   },
   {
     id: "p8",
-    name: "Ambient: Every Room, Every Device",
+    name: "Ambient",
     term: "long",
     goal: "Voice and the ambient future: Whisper, Pipecat, the smart-speaker pattern, connected-home simulation, WebXR preview. The next major platform, whatever shape it takes."
   },
   {
     id: "p9",
-    name: "Productize: The Ladder",
+    name: "Productize",
     term: "long",
     goal: "Website, phone, email, social, and now the AI. Package, price, demo, maintain, publish. Sign the first paying conduit client."
   }
