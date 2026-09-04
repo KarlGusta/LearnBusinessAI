@@ -203,9 +203,14 @@
     const bar = document.getElementById("palette-bar");
     bar.addEventListener("click", function (e) {
       const btn = e.target.closest("button");
-      if (btn) apply(btn.dataset.themeId, true);
+      if (btn) {
+        apply(btn.dataset.themeId, true);
+        try { localStorage.setItem("palette_preview_choice", btn.dataset.themeId); } catch (err) {}
+      }
     });
-    apply("violet", false);
+    let saved = null;
+    try { saved = localStorage.getItem("palette_preview_choice"); } catch (err) {}
+    apply(saved && P[saved] ? saved : "violet", true);
     const s = document.createElement("style");
     s.textContent = "#palette-bar{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:6px;align-items:center;padding:8px 12px;border-radius:999px;background:rgba(12,12,16,0.93);color:#eee;font:12px/1 system-ui,sans-serif;z-index:9999;box-shadow:0 6px 24px rgba(0,0,0,0.4);max-width:94vw;flex-wrap:wrap;justify-content:center}" +
       "#palette-bar .pb-title{font-weight:700;letter-spacing:0.04em;text-transform:uppercase;font-size:10px;margin-right:4px;color:#999}" +
