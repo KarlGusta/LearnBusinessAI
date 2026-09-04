@@ -152,6 +152,69 @@
     </div>
   </aside>
 
+  <style id="palette-override"></style>
+  <div id="palette-bar">
+    <span class="pb-title">Palette review</span>
+    <button data-theme-id="violet"><span class="sw" style="background:linear-gradient(135deg,#130f2b 50%,#a78bfa 50%)"></span>Violet (current)</button>
+    <button data-theme-id="teal"><span class="sw" style="background:linear-gradient(135deg,#05242e 50%,#22d3ee 50%)"></span>Teal + Cyan</button>
+    <button data-theme-id="forest"><span class="sw" style="background:linear-gradient(135deg,#0d1d12 50%,#a3e635 50%)"></span>Forest + Lime</button>
+    <button data-theme-id="ember"><span class="sw" style="background:linear-gradient(135deg,#1c1613 50%,#d97706 50%)"></span>Charcoal + Copper</button>
+    <button data-theme-id="scarlet"><span class="sw" style="background:linear-gradient(135deg,#17181c 50%,#ef4444 50%)"></span>Graphite + Scarlet</button>
+    <button data-theme-id="rose"><span class="sw" style="background:linear-gradient(135deg,#211019 50%,#fb7185 50%)"></span>Plum + Rose</button>
+    <button data-theme-id="ivory"><span class="sw" style="background:linear-gradient(135deg,#f2efe6 50%,#3b5bdb 50%)"></span>Ivory + Ink (light)</button>
+  </div>
+  <script>
+  (function () {
+    const P = {
+      violet: { theme: null,
+        dark: { ground: "#130f2b", porcelain: "#eceafc", t2: "#b7b0d8", t3: "#857dab", acc: "#a78bfa", wash: "rgba(167,139,250,0.12)" },
+        light: { ground: "#e9e7f4", acc: "#6d28d9", wash: "rgba(109,40,217,0.10)" } },
+      teal: { theme: "dark",
+        dark: { ground: "#05242e", porcelain: "#e7f4f6", t2: "#a8c8cf", t3: "#6f95a0", acc: "#22d3ee", wash: "rgba(34,211,238,0.12)" },
+        light: { ground: "#e3eef0", acc: "#0e7490", wash: "rgba(14,116,144,0.10)" } },
+      forest: { theme: "dark",
+        dark: { ground: "#0d1d12", porcelain: "#ecf5ec", t2: "#b0ccb4", t3: "#77977e", acc: "#a3e635", wash: "rgba(163,230,53,0.12)" },
+        light: { ground: "#e9f0e7", acc: "#4d7c0f", wash: "rgba(77,124,15,0.10)" } },
+      ember: { theme: "dark",
+        dark: { ground: "#1c1613", porcelain: "#f6efe8", t2: "#d2c0b0", t3: "#9a8878", acc: "#d97706", wash: "rgba(217,119,6,0.12)" },
+        light: { ground: "#f3ece4", acc: "#b45309", wash: "rgba(180,83,9,0.10)" } },
+      scarlet: { theme: "dark",
+        dark: { ground: "#17181c", porcelain: "#f2f3f5", t2: "#c0c4cd", t3: "#868c99", acc: "#ef4444", wash: "rgba(239,68,68,0.12)" },
+        light: { ground: "#eceef1", acc: "#b91c1c", wash: "rgba(185,28,28,0.10)" } },
+      rose: { theme: "dark",
+        dark: { ground: "#211019", porcelain: "#f8ecf2", t2: "#d5b8c8", t3: "#9c7a8e", acc: "#fb7185", wash: "rgba(251,113,133,0.12)" },
+        light: { ground: "#f3e8ee", acc: "#be123c", wash: "rgba(190,18,60,0.10)" } },
+      ivory: { theme: "light",
+        dark: { ground: "#1b2030", porcelain: "#edf0fa", t2: "#b6c0dd", t3: "#7e8aad", acc: "#7c96e8", wash: "rgba(124,150,232,0.12)" },
+        light: { ground: "#f2efe6", acc: "#3b5bdb", wash: "rgba(59,91,219,0.10)" } }
+    };
+    const styleEl = document.getElementById("palette-override");
+    function apply(id, setTheme) {
+      const p = P[id];
+      styleEl.textContent =
+        ':root[data-theme="dark"]{--ground:' + p.dark.ground + ";--porcelain:" + p.dark.porcelain +
+        ";--text-2:" + p.dark.t2 + ";--text-3:" + p.dark.t3 + ";--mustard:" + p.dark.acc + ";--wash-mustard:" + p.dark.wash + "}" +
+        ':root[data-theme="light"]{--ground:' + p.light.ground + ";--mustard:" + p.light.acc + ";--wash-mustard:" + p.light.wash + "}";
+      if (setTheme && p.theme) document.documentElement.setAttribute("data-theme", p.theme);
+      document.querySelectorAll("#palette-bar button").forEach(function (b) {
+        b.classList.toggle("pb-active", b.dataset.themeId === id);
+      });
+    }
+    const bar = document.getElementById("palette-bar");
+    bar.addEventListener("click", function (e) {
+      const btn = e.target.closest("button");
+      if (btn) apply(btn.dataset.themeId, true);
+    });
+    apply("violet", false);
+    const s = document.createElement("style");
+    s.textContent = "#palette-bar{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:6px;align-items:center;padding:8px 12px;border-radius:999px;background:rgba(12,12,16,0.93);color:#eee;font:12px/1 system-ui,sans-serif;z-index:9999;box-shadow:0 6px 24px rgba(0,0,0,0.4);max-width:94vw;flex-wrap:wrap;justify-content:center}" +
+      "#palette-bar .pb-title{font-weight:700;letter-spacing:0.04em;text-transform:uppercase;font-size:10px;margin-right:4px;color:#999}" +
+      "#palette-bar button{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.25);background:transparent;color:#eee;cursor:pointer;font:inherit}" +
+      "#palette-bar button.pb-active{border-color:#fff;background:rgba(255,255,255,0.14)}" +
+      "#palette-bar .sw{width:14px;height:14px;border-radius:50%;flex:none;border:1px solid rgba(255,255,255,0.35)}";
+    document.head.appendChild(s);
+  })();
+  </script>
   <script src="data.js"></script>
   <script src="app.js"></script>
 </body>
