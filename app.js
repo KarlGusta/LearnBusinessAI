@@ -521,84 +521,79 @@ function renderSchedule() {
     const task = TASKS.find(x => x.id === id);
     todayBits.push(`<span class="row-done">${task.title}</span>`);
   });
-  if (assignments.byDate[dISO]) {
-    const task = assignments.byDate[dISO];
-    todayBits.push(`<span class="row-pending">${task.title}</span><span class="row-phase" style="--line:${LINE_INK[task.phase]}">${LINE_NAME[task.phase]}</span>`);
+  if (todayBits.length) {
+    rows.push(rowHtml(t, todayBits.join(", "), "today done"));
+  } else if (isActive(t)) {
+    const next = assignments.byDate[dISO];
+    if (next) rows.push(rowHtml(t, `<span class="row-pending">${next.title}</span><span class="row-phase" style="--line:${LINE_INK[next.phase]}">${LINE_NAME[next.phase]}</span>`, "today"));
+    else rows.push(rowHtml(t, `<span class="row-rest">No departure</span>`, "today"));
+  } else {
+    rows.push(rowHtml(t, `<span class="row-rest">No service</span>`, "today"));
   }
-  if (!todayBits.length) {
-    todayBits.push(`<span class="row-rest">${isActive(t) ? "Session done" : "No service"}</span>`);
-  }
-  rows.push(rowHtml(t, todayBits.join("<br>"), "today", fmtTimeSlot()));
 
-  const futureDates = Object.keys(assignments.byDate).filter(dd => dd > dISO).sort().slice(0, 40);
-  for (const dd of futureDates) {
-    const task = assignments.byDate[dd];
-    rows.push(rowHtml(fromISO(dd),
-      `<span class="row-future">${task.title}</span><span class="row-phase" style="--line:${LINE_INK[task.phase]}">${LINE_NAME[task.phase]}</span>`,
-      "future", fmtTimeSlot()));
+  let futureCount = 0;
+  let cursor = nextActive(addDays(t, 1));
+  while (futureCount < 21) {
+    const dISO2 = iso(cursor);
+    const task = assignments.byDate[dISO2];
+    if (task) {
+      rows.push(rowHtml(cursor, `<span class="row-future">${task.title}</span><span class="row-phase" style="--line:${LINE_INK[task.phase]}">${LINE_NAME[task.phase]}</span>`, "future"));
+      futureCount++;
+    }
+    cursor = nextActive(addDays(cursor, 1));
   }
-  if (Object.keys(assignments.byDate).length > 41) {
-    rows.push(`<div class="sched-more">+ ${Object.keys(assignments.byDate).length - 41} more departures after this. They shift automatically as you ride.</div>`);
-  }
-  el.innerHTML = rows.join("");
+  el.innerHTML = rows.join("") + (assignments.pending.length > 21 ? `<div class="sched-more">+ more stations further down the line</div>` : "");
 }
 
-function rowHtml(d, contentHtml, cls, slot) {
-  return `
-    <div class="sched-row ${cls}">
-      <div class="sched-date">
-        <span class="sd-day">${WEEKDAYS[d.getDay()]}</span>
-        <span class="sd-num">${MONTHS[d.getMonth()]} ${d.getDate()}</span>
-        ${slot ? `<span class="sd-slot">${slot}</span>` : ""}
-      </div>
-      <div class="sched-content">${contentHtml}</div>
-    </div>`;
+function rowHtml(d, content, cls) {
+  const dISO = iso(d);
+  const isToday = dISO === iso(today());
+  return `<div class="sched-row ${isToday ? "today" : ""} ${cls}">
+    <div class="sched-date">
+      <span class="sd-day">${WEEKDAYS[d.getDay()]}</span>
+      <span class="sd-num">${MONTHS[d.getMonth()]} ${d.getDate()}</span>
+      <span class="sd-slot">${fmtTimeSlot()}</span>
+    </div>
+    <div class="sched-content">${content}</div>
+  </div>`;
 }
 
 /* ---------- all stations ---------- */
 
 function renderTasks() {
   const el = $("#tasks-body");
-  const assignments = buildAssignments();
-  const activePhase = assignments.pending.length ? assignments.pending[0].phase : null;
   let html = "";
   for (const p of PHASES) {
     const tasks = TASKS.filter(t => t.phase === p.id);
     const done = tasks.filter(t => state.completions[t.id]).length;
-    html += `
-      <details class="phase-group" style="--line:${LINE_INK[p.id]}" ${p.id === activePhase ? "open" : ""}>
-        <summary>
-          <span class="pg-ink"></span>
-          <span class="pg-name">${LINE_NAME[p.id]} &middot; ${p.name}</span>
-          <span class="pg-term ${p.term}">${p.term === "short" ? "Short term" : "Long term"}</span>
-          <span class="pg-count">${done}/${tasks.length}</span>
-        </summary>
-        <div class="pg-tasks">`;
+    html += `<details class="phase-group" ${done < tasks.length ? "open" : ""} style="--line:${LINE_INK[p.id]}">
+      <summary>
+        <span class="pg-ink"></span>
+        <span class="pg-name">${LINE_NAME[p.id]} · ${p.name}</span>
+        <span class="pg-term">${p.term}</span>
+        <span class="pg-count">${done}/${tasks.length}</span>
+      </summary>
+      <div class="pg-tasks">`;
     for (const t of tasks) {
-      const c = state.completions[t.id];
-      const when = c ? `Arrived ${fmtShort(fromISO(c.date))}` :
-        (assignments.byId[t.id] ? fmtShort(fromISO(assignments.byId[t.id])) : "");
-      const hasNote = !!(state.notes[t.id] && state.notes[t.id].trim());
-      html += `
-        <div class="task-row ${c ? "is-done" : ""}" id="task-${t.id}">
-          <label class="check">
-            <input type="checkbox" data-toggle="${t.id}" ${c ? "checked" : ""} aria-label="Mark ${t.title} complete">
-            <span class="checkmark"></span>
-          </label>
-          <div class="task-main">
-            <div class="task-title-row">
-              <span class="task-title">${t.title}</span>
-              <span class="badge type">${TYPE_LABEL[t.type] || t.type}</span>
-              ${t.cost === "paid" ? `<span class="badge cost paid">Paid</span>` : ""}
-              ${when ? `<span class="badge when">${when}</span>` : ""}
-            </div>
-            <p class="task-sub">${t.sub}</p>
-            ${taskLinksHtml(t)}
-            <button class="note-toggle" data-notetoggle="${t.id}">${hasNote ? "View log entry" : "+ Log entry"}</button>
-            <textarea class="note-input hidden" data-note="${t.id}"
-              placeholder="Key takeaways, follow ups, remember for tomorrow..."></textarea>
+      const checked = !!state.completions[t.id];
+      const note = state.notes[t.id] || "";
+      html += `<div class="task-row ${checked ? "is-done" : ""}" id="task-${t.id}">
+        <label class="check">
+          <input type="checkbox" data-complete="${t.id}" ${checked ? "checked" : ""}>
+          <span class="checkmark"></span>
+        </label>
+        <div class="task-main">
+          <div class="task-title-row">
+            <span class="task-title">${t.title}</span>
+            <span class="badge">${TYPE_LABEL[t.type] || t.type}</span>
+            ${t.cost === "paid" ? '<span class="badge cost paid">Paid</span>' : ""}
           </div>
-        </div>`;
+          <p class="task-sub">${t.sub}</p>
+          ${taskLinksHtml(t)}
+          <button class="note-toggle" data-note-toggle="${t.id}">${note ? "Edit log" : "Add log entry"}</button>
+          <textarea class="note-input ${note ? "" : "hidden"}" data-note="${t.id}" placeholder="Key takeaways...">${note.replace(/</g, "<")}</textarea>
+        </div>
+      </div>`;
     }
     html += `</div></details>`;
   }
@@ -607,73 +602,81 @@ function renderTasks() {
   hydrateButtons(el);
 }
 
-/* ---------- settings ---------- */
+function hydrateNotes(root) {
+  root.querySelectorAll("[data-note]").forEach(ta => {
+    ta.addEventListener("change", () => {
+      state.notes[ta.dataset.note] = ta.value;
+      saveState();
+    });
+  });
+  root.querySelectorAll("[data-note-toggle]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.noteToggle;
+      const ta = root.querySelector(`[data-note="${id}"]`);
+      if (ta) {
+        ta.classList.toggle("hidden");
+        if (!ta.classList.contains("hidden")) ta.focus();
+      }
+    });
+  });
+  root.querySelectorAll("[data-note-focus]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.noteFocus;
+      const ta = root.querySelector(`[data-note="${id}"]`);
+      if (ta) {
+        ta.classList.add("visible");
+        ta.focus();
+      }
+    });
+  });
+}
+
+function hydrateButtons(root) {
+  root.querySelectorAll("[data-complete]").forEach(btn => {
+    btn.addEventListener("click", e => {
+      if (btn.tagName === "INPUT") return; // checkbox handled separately
+      const id = btn.dataset.complete;
+      if (state.completions[id]) {
+        delete state.completions[id];
+      } else {
+        state.completions[id] = { date: iso(today()) };
+      }
+      saveState();
+      renderAll();
+    });
+  });
+  root.querySelectorAll("input[data-complete]").forEach(cb => {
+    cb.addEventListener("change", () => {
+      const id = cb.dataset.complete;
+      if (cb.checked) state.completions[id] = { date: iso(today()) };
+      else delete state.completions[id];
+      saveState();
+      renderAll();
+    });
+  });
+}
 
 function renderSettings() {
-  const wrap = $("#weekday-picker");
-  wrap.innerHTML = WEEKDAYS.map((w, i) =>
-    `<button class="day-chip ${state.settings.activeDays.includes(i) ? "on" : ""}" data-day="${i}">${w}</button>`
-  ).join("");
-  wrap.querySelectorAll("[data-day]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const d = Number(btn.dataset.day);
-      const days = new Set(state.settings.activeDays);
-      if (days.has(d)) {
-        if (days.size === 1) return; // keep at least one service day
-        days.delete(d);
-      } else days.add(d);
-      state.settings.activeDays = [...days].sort();
+  const picker = $("#weekday-picker");
+  picker.innerHTML = "";
+  WEEKDAYS.forEach((name, i) => {
+    const b = document.createElement("button");
+    b.className = "day-chip" + (state.settings.activeDays.includes(i) ? " active" : "");
+    b.textContent = name;
+    b.addEventListener("click", () => {
+      const set = new Set(state.settings.activeDays);
+      if (set.has(i)) {
+        if (set.size <= 4) return;
+        set.delete(i);
+      } else set.add(i);
+      state.settings.activeDays = [...set].sort();
       saveState();
       renderSettings();
       renderAll();
     });
+    picker.appendChild(b);
   });
   $("#time-input").value = state.settings.startTime;
-}
-
-/* ---------- interactions ---------- */
-
-function hydrateNotes(scope) {
-  scope.querySelectorAll("textarea[data-note]").forEach(ta => {
-    const id = ta.dataset.note;
-    ta.value = state.notes[id] || "";
-    ta.addEventListener("input", () => {
-      state.notes[id] = ta.value;
-      saveState();
-    });
-  });
-}
-
-function hydrateButtons(scope) {
-  scope.querySelectorAll("[data-complete]").forEach(btn => {
-    btn.addEventListener("click", () => toggleTask(btn.dataset.complete, true));
-  });
-  scope.querySelectorAll("[data-toggle]").forEach(cb => {
-    cb.addEventListener("change", () => toggleTask(cb.dataset.toggle, cb.checked));
-  });
-  scope.querySelectorAll("[data-notetoggle]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const ta = btn.parentElement.querySelector("textarea[data-note]");
-      ta.classList.toggle("hidden");
-      if (!ta.classList.contains("hidden")) ta.focus();
-    });
-  });
-  scope.querySelectorAll("[data-note-focus]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const ta = document.querySelector(`.hero-note[data-note="${btn.dataset.noteFocus}"]`);
-      if (ta) { ta.classList.add("visible"); ta.focus(); }
-    });
-  });
-}
-
-function toggleTask(id, done) {
-  if (done) {
-    state.completions[id] = { date: iso(today()) };
-  } else {
-    delete state.completions[id];
-  }
-  saveState();
-  renderAll();
 }
 
 /* ---------- tabs, theme, chrome ---------- */
@@ -765,11 +768,32 @@ function renderAll() {
   renderTasks();
 }
 
+/* ---------- scroll reveal ---------- */
+
+function setupReveal() {
+  const nodes = document.querySelectorAll(".reveal");
+  if (!nodes.length) return;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    nodes.forEach(el => el.classList.add("is-visible"));
+    return;
+  }
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("is-visible");
+        io.unobserve(entry.target);
+      }
+    });
+  }, { root: null, rootMargin: "0px 0px -8% 0px", threshold: 0.12 });
+  nodes.forEach(el => io.observe(el));
+}
+
 applyTheme();
 setupTabs();
 setupChrome();
 renderSettings();
 renderAll();
+setupReveal();
 
 // refresh at midnight so the schedule rolls over without a reload
 (function scheduleMidnightRefresh() {
