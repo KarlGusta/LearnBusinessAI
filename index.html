@@ -31,7 +31,7 @@
 <body>
   <div class="mural">
 
-    <header class="topbar">
+    <header class="topbar reveal">
       <div class="brand">
         <span class="roundel" aria-hidden="true"><span class="roundel-core"></span></span>
         <div class="brand-text">
@@ -46,7 +46,7 @@
     </header>
 
     <!-- Service board -->
-    <section class="board" aria-label="Progress metrics">
+    <section class="board reveal" aria-label="Progress metrics">
       <div class="board-cell">
         <span class="b-label">Journey</span>
         <span class="b-value" id="stat-pct">0%</span>
@@ -80,7 +80,7 @@
     </section>
 
     <!-- Now boarding -->
-    <section class="panel today-panel">
+    <section class="panel today-panel reveal">
       <div class="panel-head">
         <h2 class="panel-title">Now boarding</h2>
         <span class="panel-meta"><span id="today-date"></span> &middot; <span id="today-slot"></span></span>
@@ -89,28 +89,28 @@
     </section>
 
     <!-- Views -->
-    <nav class="viewnav" aria-label="Views">
+    <nav class="viewnav reveal" aria-label="Views">
       <button class="tab active" data-panel="panel-timeline">Network map</button>
       <button class="tab" data-panel="panel-schedule">Departures</button>
       <button class="tab" data-panel="panel-tasks">All stations</button>
     </nav>
 
     <section id="panel-timeline" class="tab-panel active">
-      <div class="panel map-panel">
+      <div class="panel map-panel reveal">
         <div class="map-wrap" id="map-wrap"></div>
       </div>
-      <div id="timeline-body"></div>
+      <div id="timeline-body" class="reveal"></div>
     </section>
 
     <section id="panel-schedule" class="tab-panel">
-      <div class="panel" id="schedule-body"></div>
+      <div class="panel reveal" id="schedule-body"></div>
     </section>
 
     <section id="panel-tasks" class="tab-panel">
-      <div id="tasks-body"></div>
+      <div id="tasks-body" class="reveal"></div>
     </section>
 
-    <footer class="footnote">
+    <footer class="footnote reveal">
       <p>102 stations &middot; 1 hour each &middot; free first, paid flagged &middot; skipped days shift every remaining station forward automatically.<br>
       Progress is stored in this browser only. Export a backup from Service before clearing browser data.</p>
     </footer>
